@@ -4,6 +4,7 @@
 
 - Adding New Users.
 - Making sure authorized users only have access to certain pages.
+- CRUD Operations.
 
 ## Tools Used in the Application
 
@@ -28,19 +29,4 @@ npm install
 ```bash
 cd compose
 docker compose up
-```
-
-### Preparing the Database
-
-The Node.js Application will handle all the data & table creating in the database except for the database creation itself, it has to be created manually.
-You can do so by using these commands in the Mongo Shell
-
-```bash
-use blog
-```
-
-### Starting the Node.js Server
-
-```bash
-npm start
 ```
