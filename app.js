@@ -2,20 +2,18 @@ const path = require("path");
 
 const express = require("express");
 const session = require("express-session");
-const mongodbStore = require("connect-mongodb-session");
+const csrf = require("csurf");
 
+const sessionConfig = require("./config/session");
 const db = require("./data/database");
-const demoRoutes = require("./routes/demo");
+const blogRoutes = require("./routes/blog");
+const authRoutes = require("./routes/auth");
+const authMiddleware = require("./middlewares/auth-middleware");
+const addSCRFTokenMiddleware = require("./middlewares/csrf-token-middleware");
 
-const MongoDBStore = mongodbStore(session);
+const mongoDbSessionStore = sessionConfig.createSessionStore(session);
 
 const app = express();
-
-const sessionStore = new MongoDBStore({
-  uri: "mongodb://localhost:27017",
-  databaseName: "auth-demo",
-  collection: "sessions",
-});
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -23,16 +21,14 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
-app.use(
-  session({
-    secret: "super-secret",
-    resave: false,
-    saveUninitialized: false,
-    store: sessionStore,
-  })
-);
+app.use(session(sessionConfig.createSessionConfig(mongoDbSessionStore)));
+app.use(csrf());
 
-app.use(demoRoutes);
+app.use(addSCRFTokenMiddleware);
+app.use(authMiddleware);
+
+app.use(blogRoutes);
+app.use(authRoutes);
 
 app.use(function (error, req, res, next) {
   res.render("500");
